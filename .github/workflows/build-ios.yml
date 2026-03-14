@@ -13,7 +13,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'  # ← ГЛАВНОЕ ИЗМЕНЕНИЕ: теперь версия 22
+          cache: npm
+
+      - name: Verify Node version
+        run: node --version  # Проверим, что версия правильная
 
       - name: Install dependencies
         run: npm ci
