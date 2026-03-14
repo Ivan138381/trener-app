@@ -22,11 +22,33 @@ jobs:
       - name: Create www folder
         run: mkdir -p www
 
+      - name: 📁 Check iOS folder structure
+        run: |
+          echo "=== Содержимое папки ios ==="
+          ls -la ios/ || echo "Папка ios не существует"
+          echo ""
+          echo "=== Содержимое папки ios/App ==="
+          ls -la ios/App/ || echo "Папка ios/App не существует"
+          echo ""
+          echo "=== Поиск .xcworkspace файлов ==="
+          find ios -name "*.xcworkspace" -type d || echo "Файлы .xcworkspace не найдены"
+
       - name: Remove existing iOS folder
         run: rm -rf ios
 
       - name: Add iOS platform
         run: npx cap add ios
+
+      - name: Verify workspace was created
+        run: |
+          echo "=== Проверка создания workspace ==="
+          ls -la ios/App/
+          if [ -f "ios/App/App.xcworkspace" ]; then
+            echo "✅ App.xcworkspace создан успешно"
+          else
+            echo "❌ App.xcworkspace НЕ создан"
+            exit 1
+          fi
 
       - name: Sync Capacitor
         run: npx cap sync ios
