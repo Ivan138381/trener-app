@@ -30,14 +30,11 @@ jobs:
           mkdir -p www
           cp index.html www/
 
-      - name: Add iOS platform
-        run: npx cap add ios  # ← ВАЖНО: создает iOS проект
-
       - name: Sync with Capacitor
-        run: npx cap sync ios  # ← ВАЖНО: копирует web в нативный проект
+        run: npx cap sync ios  # Только синхронизация, без добавления
 
-      - name: List iOS directory contents (для проверки)
-        run: ls -la ios/
+      - name: List iOS directory contents (проверка)
+        run: ls -la ios/ ios/App
 
       - name: Build iOS app
         run: |
