@@ -22,6 +22,9 @@ jobs:
       - name: Create www folder
         run: mkdir -p www
 
+      - name: Remove existing iOS folder
+        run: rm -rf ios
+
       - name: Add iOS platform
         run: npx cap add ios
 
@@ -38,27 +41,28 @@ jobs:
                      archive \
                      CODE_SIGNING_ALLOWED=NO
 
+      - name: Create IPA directory
+        run: mkdir -p ${{ runner.temp }}/ipa
+
       - name: Export IPA
         run: |
-          mkdir -p ${{ runner.temp }}/ipa
           xcodebuild -exportArchive \
                      -archivePath ${{ runner.temp }}/App.xcarchive \
                      -exportOptionsPlist ExportOptions.plist \
                      -exportPath ${{ runner.temp }}/ipa \
                      -allowProvisioningUpdates \
                      CODE_SIGNING_ALLOWED=NO || \
-          echo "Export failed, but we'll try to find the .app bundle"
+          echo "Export failed, but continuing"
 
-      - name: Find and save .app bundle (fallback)
+      - name: Find and save any IPA or app bundle
         run: |
-          find ${{ runner.temp }} -name "*.app" -type d || true
           find ${{ runner.temp }} -name "*.ipa" -type f || true
-          # Если нашли .app, можно заархивировать его как IPA
+          find ${{ runner.temp }} -name "*.app" -type d || true
+          # Если нашли .app, запакуем его
           APP_PATH=$(find ${{ runner.temp }} -name "*.app" -type d | head -1)
           if [ -n "$APP_PATH" ]; then
             cd "$(dirname "$APP_PATH")"
-            zip -r ${{ runner.temp }}/ipa/fallback.ipa "$(basename "$APP_PATH")"
-            echo "Created fallback IPA from .app bundle"
+            zip -r ${{ runner.temp }}/ipa/app_bundle.zip "$(basename "$APP_PATH")"
           fi
 
       - name: Upload IPA artifact
@@ -67,12 +71,12 @@ jobs:
           name: app-ipa
           path: |
             ${{ runner.temp }}/ipa/*.ipa
+            ${{ runner.temp }}/ipa/*.zip
             ${{ runner.temp }}/*.ipa
-            ${{ runner.temp }}/**/*.ipa
           if-no-files-found: warn
 
-      - name: Upload xcarchive as fallback
-        if: failure()
+      - name: Upload xcarchive as backup
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: app-xcarchive
