@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🏋️ Тренер 20кг</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #1e3a5f, #0f2a40);
+            color: white;
+            padding: 50px 20px 30px;
+            text-align: center;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .app-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        .progress-badge {
+            background: #ffd966;
+            color: #1e3a5f;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            margin-top: 20px;
+            display: inline-block;
+            font-size: 1.2rem;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 30px;
+            padding: 20px 10px;
+            text-align: center;
+            box-shadow: 0 8px 0 #d0ddee;
+            border: 1px solid white;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+
+        .menu-card.active {
+            background: #f3c26b;
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #b57c2a;
+        }
+
+        .menu-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .menu-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .menu-count {
+            color: #5a6e85;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .recipe-list {
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            box-shadow: 0 8px 0 #d0ddee;
+            margin-bottom: 20px;
+        }
+
+        .recipe-item {
+            border-bottom: 2px solid #eef2f6;
+            padding: 15px 0;
+        }
+
+        .recipe-item:last-child {
+            border-bottom: none;
+        }
+
+        .recipe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+
+        .recipe-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recipe-arrow {
+            font-size: 1.5rem;
+            color: #1e3a5f;
+            transition: 0.2s;
+        }
+
+        .recipe-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f8fcff;
+            border-radius: 25px;
+            margin-top: 10px;
+        }
+
+        .recipe-item.open .recipe-details {
+            max-height: 600px;
+            padding: 15px;
+        }
+
+        .recipe-item.open .recipe-arrow {
+            transform: rotate(90deg);
+        }
+
+        .ingredients {
+            margin-bottom: 15px;
+        }
+
+        .ingredients h4 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .ingredient-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px dashed #d0ddee;
+        }
+
+        .instructions {
+            background: #fff6e5;
+            padding: 15px;
+            border-radius: 20px;
+            margin: 15px 0;
+            white-space: pre-line;
+        }
+
+        .nutrition {
+            display: flex;
+            justify-content: space-around;
+            background: #e9f0fa;
+            padding: 12px;
+            border-radius: 30px;
+            margin-top: 10px;
+        }
+
+        .nutrition-item {
+            text-align: center;
+        }
+
+        .nutrition-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1e3a5f;
+        }
+
+        .nutrition-label {
+            font-size: 0.8rem;
+            color: #4a627a;
+        }
+
+        .workout-card {
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 0 #d0ddee;
+            border-left: 10px solid;
+        }
+
+        .day-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .exercise {
+            padding: 8px 0;
+            border-bottom: 1px solid #eef2f6;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-container {
+            background: white;
+            border-radius: 40px;
+            padding: 25px;
+            box-shadow: 0 8px 0 #d0ddee;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .weight-display {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            margin: 15px 0;
+        }
+
+        .weight-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .weight-btn {
+            background: #e9f0fa;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            font-size: 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #bacde2;
+        }
+
+        .weight-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #bacde2;
+        }
+
+        .progress-bar {
+            background: #e9f0fa;
+            height: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #f3c26b;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .bottom-nav {
+            display: flex;
+            background: white;
+            border-radius: 40px;
+            padding: 10px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .nav-item.active {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .footer-note {
+            text-align: center;
+            padding: 20px;
+            color: #5a6e85;
+            font-size: 0.9rem;
+        }
+
+        .manual-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .manual-input input {
+            flex: 1;
+            padding: 15px;
+            border-radius: 30px;
+            border: 2px solid #d0ddee;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .manual-input button {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <h1>🔥 ТРЕНЕР 20кг</h1>
+        <p>4 месяца · Дом · Резинки</p>
+        <div class="progress-badge" id="headerWeight">93 кг</div>
+    </div>
+
+    <div class="container">
+        <div id="section-meals" class="section active">
+            <div class="menu-grid" id="mealMenu">
+                <div class="menu-card active" data-meal="breakfast">
+                    <div class="menu-emoji">🍳</div>
+                    <div class="menu-title">Завтрак</div>
+                    <div class="menu-count">5 рецептов</div>
+                </div>
+                <div class="menu-card" data-meal="snack1">
+                    <div class="menu-emoji">🍎</div>
+                    <div class="menu-title">Перекус</div>
+                    <div class="menu-count">5 рецептов</div>
+                </div>
+                <div class="menu-card" data-meal="lunch">
+                    <div class="menu-emoji">🍗</div>
+                    <div class="menu-title">Обед</div>
+                    <div class="menu-count">5 рецептов</div>
+                </div>
+                <div class="menu-card" data-meal="snack2">
+                    <div class="menu-emoji">🥛</div>
+                    <div class="menu-title">Полдник</div>
+                    <div class="menu-count">5 рецептов</div>
+                </div>
+                <div class="menu-card" data-meal="dinner">
+                    <div class="menu-emoji">🐟</div>
+                    <div class="menu-title">Ужин</div>
+                    <div class="menu-count">5 рецептов</div>
+                </div>
+                <div class="menu-card" data-meal="workouts">
+                    <div class="menu-emoji">💪</div>
+                    <div class="menu-title">Тренировки</div>
+                    <div class="menu-count">+ стрелки</div>
+                </div>
+            </div>
+
+            <div id="recipe-container" class="recipe-list"></div>
+        </div>
+
+        <div id="section-progress" class="section">
+            <div class="progress-container">
+                <h2>📉 Твой прогресс</h2>
+                <div class="weight-display" id="currentWeight">93</div>
+                
+                <div class="weight-buttons">
+                    <button class="weight-btn" id="weightMinus">−</button>
+                    <button class="weight-btn" id="weightPlus">+</button>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+
+                <p>Осталось сбросить: <span id="remaining">20</span> кг</p>
+                
+                <div class="manual-input">
+                    <input type="number" id="manualWeight" placeholder="Введи вес" step="0.1">
+                    <button id="setWeightBtn">Обновить</button>
+                </div>
+            </div>
+
+            <div class="workout-card" style="border-left-color: #f3c26b;">
+                <div class="day-title">📅 Сегодня</div>
+                <div id="todayWorkout">ПН: Силовая круговая</div>
+            </div>
+        </div>
+
+        <div id="section-workouts" class="section">
+            <h2 style="font-size: 2rem; margin-bottom: 20px;">🏋️ Тренировки</h2>
+            
+            <div class="workout-card" style="border-left-color: #2563eb;">
+                <div class="day-title">ПН / ЧТ: Силовая круговая</div>
+                <div class="exercise"><span>🏋️ Приседания</span> <span>20</span></div>
+                <div class="exercise"><span>💪 Отжимания</span> <span>10-12</span></div>
+                <div class="exercise"><span>🍑 Ягодичный мостик</span> <span>20</span></div>
+                <div class="exercise"><span>🔁 Тяга резинки</span> <span>15</span></div>
+                <div class="exercise"><span>📏 Планка динамическая</span> <span>10/ст</span></div>
+                <div class="exercise"><span>🚶 Выпады назад</span> <span>12/ногу</span></div>
+            </div>
+
+            <div class="workout-card" style="border-left-color: #b45309;">
+                <div class="day-title">ВТ: Низ + кардио</div>
+                <div class="exercise"><span>🔥 Суперсет 1</span> <span>3 подхода</span></div>
+                <div class="exercise"><span>🍑 Суперсет 2</span> <span>3 подхода</span></div>
+            </div>
+
+            <div class="workout-card" style="border-left-color: #7e22ce;">
+                <div class="day-title">ПТ: Верх + плечи</div>
+                <div class="exercise"><span>💪 Отжимания</span> <span>4×10-12</span></div>
+                <div class="exercise"><span>🔁 Тяга резинки</span> <span>4×15</span></div>
+                <div class="exercise"><span>🏋️ Жим вверх</span> <span>3×15</span></div>
+                <div class="exercise"><span>🪽 Разведение рук</span> <span>3×12-15</span></div>
+                <div class="exercise"><span>📏 Планка</span> <span>3×45″</span></div>
+            </div>
+
+            <div class="workout-card" style="border-left-color: #16a34a;">
+                <div class="day-title">СБ: Активная прогулка</div>
+                <div class="exercise">🚶 40-60 мин быстрым шагом</div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" data-section="meals">🍽️</div>
+            <div class="nav-item" data-section="progress">📊</div>
+            <div class="nav-item" data-section="workouts">💪</div>
+        </div>
+
+        <div class="footer-note">
+            ⭐ Вода 2-3 л · Сон 8 ч
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ========== ДАННЫЕ ==========
+            const meals = {
+                breakfast: [
+                    { name: "Омлет с овощами", emoji: "🍳", time: "10 мин", kcal: 350, protein: 24, fat: 22, carbs: 8, 
+                      ingredients: ["🥚 Яйца 3 шт (150 г)", "🥛 Молоко 50 мл", "🍅 Помидоры черри 80 г", "🫑 Перец 50 г", "🫒 Масло 5 г"],
+                      instructions: "1. Взбей яйца с молоком.\n2. Обжарь овощи 2 мин.\n3. Залей яйцами, жарь 5-7 мин под крышкой." },
+                    { name: "Овсяноблин", emoji: "🥞", time: "15 мин", kcal: 380, protein: 26, fat: 12, carbs: 40,
+                      ingredients: ["🥚 Яйцо 1 шт", "🌾 Овсянка 40 г", "🥛 Молоко 50 мл", "🥛 Творог 100 г", "🍓 Ягоды 80 г"],
+                      instructions: "1. Смешай яйцо, овсянку, молоко.\n2. Выпеки блин.\n3. Выложи творог с ягодами." },
+                    { name: "Творожная запеканка", emoji: "🍰", time: "40 мин", kcal: 320, protein: 28, fat: 10, carbs: 30,
+                      ingredients: ["🥛 Творог 200 г", "🥚 Яйцо 1 шт", "🍎 Яблоко 100 г", "🌾 Манка 20 г", "🍯 Мед 10 г"],
+                      instructions: "1. Смешай всё.\n2. Выпекай 35 мин при 180°C." },
+                    { name: "Гречка с яйцом", emoji: "🍚", time: "20 мин", kcal: 340, protein: 18, fat: 14, carbs: 35,
+                      ingredients: ["🌾 Гречка 50 г", "🥚 Яйцо 1 шт", "🥑 Авокадо 50 г", "🍅 Помидоры 50 г"],
+                      instructions: "1. Свари гречку.\n2. Сделай яйцо пашот.\n3. Подавай с авокадо." },
+                    { name: "Сырники", emoji: "🧀", time: "20 мин", kcal: 310, protein: 24, fat: 12, carbs: 22,
+                      ingredients: ["🥛 Творог 180 г", "🥚 Яйцо 1 шт", "🌾 Рисовая мука 30 г", "🍯 Мед 10 г"],
+                      instructions: "1. Смешай всё.\n2. Обжарь без масла.\n3. Подавай со сметаной." }
+                ],
+                snack1: [
+                    { name: "Яблоко + миндаль", emoji: "🍎", time: "1 мин", kcal: 210, protein: 6, fat: 15, carbs: 18,
+                      ingredients: ["🍎 Яблоко 200 г", "🌰 Миндаль 30 г"],
+                      instructions: "Помой яблоко, отмерь орехи." },
+                    { name: "Груша + грецкие", emoji: "🍐", time: "1 мин", kcal: 220, protein: 5, fat: 16, carbs: 20,
+                      ingredients: ["🍐 Груша 180 г", "🌰 Грецкие орехи 30 г"],
+                      instructions: "Помой грушу, отмерь орехи." },
+                    { name: "Банан + фундук", emoji: "🍌", time: "1 мин", kcal: 240, protein: 5, fat: 16, carbs: 25,
+                      ingredients: ["🍌 Банан 150 г", "🌰 Фундук 30 г"],
+                      instructions: "Очисти банан, отмерь орехи." },
+                    { name: "Апельсин + кешью", emoji: "🍊", time: "1 мин", kcal: 210, protein: 6, fat: 14, carbs: 18,
+                      ingredients: ["🍊 Апельсин 200 г", "🌰 Кешью 30 г"],
+                      instructions: "Очисти апельсин, отмерь орехи." },
+                    { name: "Персик + миндаль", emoji: "🍑", time: "1 мин", kcal: 200, protein: 5, fat: 14, carbs: 16,
+                      ingredients: ["🍑 Персик 150 г", "🌰 Миндаль 30 г"],
+                      instructions: "Помой персики, отмерь орехи." }
+                ],
+                lunch: [
+                    { name: "Курица с гречкой", emoji: "🍗", time: "40 мин", kcal: 450, protein: 45, fat: 8, carbs: 35,
+                      ingredients: ["🐔 Курица 200 г", "🌾 Гречка 50 г", "🧄 Чеснок 2 зуб", "🥒 Огурец 100 г", "🍅 Помидор 100 г", "🫒 Масло 5 г"],
+                      instructions: "1. Замаринуй курицу в соевом соусе с чесноком.\n2. Запекай 30 мин при 200°C.\n3. Свари гречку 15-20 мин.\n4. Нарежь салат из огурца и помидора." },
+                    { name: "Индейка с рисом", emoji: "🦃", time: "45 мин", kcal: 430, protein: 42, fat: 7, carbs: 38,
+                      ingredients: ["🦃 Индейка 200 г", "🌾 Рис бурый 50 г", "🥕 Морковь 50 г", "🧅 Лук 30 г", "🥦 Брокколи 100 г"],
+                      instructions: "1. Обжарь лук, морковь, добавь индейку.\n2. Добавь брокколи, туши 15 мин.\n3. Свари рис 30 мин." },
+                    { name: "Треска с картофелем", emoji: "🐟", time: "40 мин", kcal: 410, protein: 32, fat: 10, carbs: 40,
+                      ingredients: ["🐟 Треска 200 г", "🥔 Картофель 200 г", "🍋 Лимон", "🌿 Розмарин"],
+                      instructions: "1. Нарежь картофель, запекай 25 мин.\n2. Добавь рыбу в фольге, запекай еще 15 мин." },
+                    { name: "Говядина с овощами", emoji: "🥩", time: "35 мин", kcal: 320, protein: 28, fat: 14, carbs: 18,
+                      ingredients: ["🥩 Говядина 150 г", "🫑 Перец 100 г", "🥬 Кабачок 100 г", "🧅 Лук 50 г"],
+                      instructions: "1. Обжарь говядину 3-4 мин.\n2. Добавь овощи, жарь 5 мин.\n3. Добавь соевый соус, туши 2 мин." },
+                    { name: "Куриные котлеты", emoji: "🍔", time: "45 мин", kcal: 420, protein: 38, fat: 12, carbs: 35,
+                      ingredients: ["🐔 Фарш 200 г", "🧅 Лук 50 г", "🥚 Яйцо 1 шт", "🌾 Гречка 50 г"],
+                      instructions: "1. Смешай фарш с луком и яйцом.\n2. Сформируй котлеты, запекай 25 мин.\n3. Свари гречку." }
+                ],
+                snack2: [
+                    { name: "Творог с ягодами", emoji: "🥛", time: "5 мин", kcal: 250, protein: 28, fat: 10, carbs: 12,
+                      ingredients: ["🥛 Творог 200 г", "🍓 Ягоды 100 г"],
+                      instructions: "Смешай творог с ягодами." },
+                    { name: "Протеиновый коктейль", emoji: "🥤", time: "5 мин", kcal: 230, protein: 30, fat: 4, carbs: 15,
+                      ingredients: ["🥛 Кефир 250 мл", "🍓 Ягоды 80 г", "💪 Протеин 30 г"],
+                      instructions: "Взбей всё в блендере." },
+                    { name: "Йогурт с орехами", emoji: "🍦", time: "3 мин", kcal: 220, protein: 14, fat: 12, carbs: 16,
+                      ingredients: ["🥛 Йогурт 200 г", "🌰 Орехи 20 г", "🍯 Мед 10 г"],
+                      instructions: "Смешай." },
+                    { name: "Запеканка мини", emoji: "🍮", time: "25 мин", kcal: 210, protein: 22, fat: 8, carbs: 14,
+                      ingredients: ["🥛 Творог 150 г", "🥚 Яйцо", "🍎 Яблоко 80 г"],
+                      instructions: "Смешай, запеки 20 мин при 180°C." },
+                    { name: "Ряженка + хлебец", emoji: "🥛", time: "2 мин", kcal: 160, protein: 8, fat: 6, carbs: 18,
+                      ingredients: ["🥛 Ряженка 200 мл", "🍞 Хлебец 20 г"],
+                      instructions: "Наслаждайся." }
+                ],
+                dinner: [
+                    { name: "Рыба с брокколи", emoji: "🐟", time: "30 мин", kcal: 240, protein: 34, fat: 6, carbs: 8,
+                      ingredients: ["🐟 Рыба 200 г", "🥦 Брокколи 150 г", "🍋 Лимон"],
+                      instructions: "Запекай рыбу с брокколи 25 мин при 180°C." },
+                    { name: "Курица с фасолью", emoji: "🍗", time: "25 мин", kcal: 250, protein: 38, fat: 6, carbs: 10,
+                      ingredients: ["🐔 Курица 200 г", "🥬 Фасоль 150 г"],
+                      instructions: "Обжарь курицу, добавь фасоль, туши 10 мин." },
+                    { name: "Омлет с овощами", emoji: "🍳", time: "15 мин", kcal: 280, protein: 22, fat: 18, carbs: 8,
+                      ingredients: ["🥚 Яйца 3 шт", "🥛 Молоко 50 мл", "🍅 Овощи 150 г"],
+                      instructions: "Как на завтрак." },
+                    { name: "Творог с зеленью", emoji: "🥛", time: "5 мин", kcal: 210, protein: 26, fat: 10, carbs: 8,
+                      ingredients: ["🥛 Творог 200 г", "🥒 Огурец 100 г", "🌿 Зелень"],
+                      instructions: "Смешай." },
+                    { name: "Салат с тунцом", emoji: "🥗", time: "10 мин", kcal: 230, protein: 28, fat: 10, carbs: 6,
+                      ingredients: ["🐟 Тунец 150 г", "🥬 Салат 100 г", "🍅 Помидоры 80 г", "🥚 Яйцо"],
+                      instructions: "Нарежь всё, смешай." }
+                ]
+            };
+
+            // ========== СОСТОЯНИЕ ==========
+            let currentWeight = 93;
+            const targetWeight = 73;
+            let currentMeal = 'breakfast';
+
+            // ========== DOM ЭЛЕМЕНТЫ ==========
+            const sections = {
+                meals: document.getElementById('section-meals'),
+                progress: document.getElementById('section-progress'),
+                workouts: document.getElementById('section-workouts')
+            };
+
+            const navItems = document.querySelectorAll('.nav-item');
+            const mealMenu = document.getElementById('mealMenu');
+            const recipeContainer = document.getElementById('recipe-container');
+            const headerWeight = document.getElementById('headerWeight');
+            const currentWeightSpan = document.getElementById('currentWeight');
+            const remainingSpan = document.getElementById('remaining');
+            const progressFill = document.getElementById('progressFill');
+            const todayWorkout = document.getElementById('todayWorkout');
+
+            // ========== ФУНКЦИИ ==========
+            function switchSection(section) {
+                Object.values(sections).forEach(s => s.classList.remove('active'));
+                sections[section].classList.add('active');
+                
+                navItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.section === section);
+                });
+            }
+
+            function showMeal(meal) {
+                if (meal === 'workouts') {
+                    switchSection('workouts');
+                    return;
+                }
+
+                currentMeal = meal;
+                
+                // Обновить активную карточку меню
+                document.querySelectorAll('.menu-card').forEach(card => {
+                    card.classList.toggle('active', card.dataset.meal === meal);
+                });
+
+                // Показать рецепты
+                const recipeList = meals[meal];
+                let html = '';
+                
+                recipeList.forEach((recipe, idx) => {
+                    const recipeId = `recipe-${meal}-${idx}`;
+                    html += `
+                        <div class="recipe-item" data-recipe-id="${recipeId}">
+                            <div class="recipe-header">
+                                <div class="recipe-name">
+                                    <span>${recipe.emoji}</span>
+                                    ${recipe.name}
+                                </div>
+                                <span class="recipe-arrow">▶</span>
+                            </div>
+                            <div class="recipe-details">
+                                <div class="ingredients">
+                                    <h4>📦 Ингредиенты</h4>
+                                    ${recipe.ingredients.map(ing => `<div class="ingredient-row"><span>${ing}</span></div>`).join('')}
+                                </div>
+                                <div class="instructions">
+                                    <strong>👩‍🍳 Приготовление</strong>
+                                    <p style="margin-top: 10px;">${recipe.instructions}</p>
+                                </div>
+                                <div class="nutrition">
+                                    <div class="nutrition-item"><span class="nutrition-value">${recipe.kcal}</span><div class="nutrition-label">ККАЛ</div></div>
+                                    <div class="nutrition-item"><span class="nutrition-value">${recipe.protein}</span><div class="nutrition-label">БЕЛКИ</div></div>
+                                    <div class="nutrition-item"><span class="nutrition-value">${recipe.fat}</span><div class="nutrition-label">ЖИРЫ</div></div>
+                                    <div class="nutrition-item"><span class="nutrition-value">${recipe.carbs}</span><div class="nutrition-label">УГЛЕВОДЫ</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                recipeContainer.innerHTML = html;
+
+                // Добавить обработчики для рецептов
+                document.querySelectorAll('.recipe-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        this.classList.toggle('open');
+                    });
+                });
+            }
+
+            function updateWeightDisplay() {
+                headerWeight.innerText = currentWeight + ' кг';
+                currentWeightSpan.innerText = currentWeight;
+                
+                const lost = 93 - currentWeight;
+                const remaining = currentWeight - targetWeight;
+                const percent = (lost / 20) * 100;
+                
+                remainingSpan.innerText = Math.max(0, remaining).toFixed(1);
+                progressFill.style.width = Math.min(100, Math.max(0, percent)) + '%';
+            }
+
+            function setWeight(value) {
+                if (value >= 50 && value <= 150) {
+                    currentWeight = value;
+                    updateWeightDisplay();
+                }
+            }
+
+            function adjustWeight(delta) {
+                const newWeight = currentWeight + delta;
+                if (newWeight >= 50 && newWeight <= 150) {
+                    currentWeight = newWeight;
+                    updateWeightDisplay();
+                }
+            }
+
+            // ========== ИНИЦИАЛИЗАЦИЯ ==========
+            showMeal('breakfast');
+            updateWeightDisplay();
+
+            // День недели
+            const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+            const today = new Date().getDay();
+            const workouts = {
+                1: 'ПН: Силовая круговая',
+                2: 'ВТ: Низ + кардио',
+                3: 'СР: Отдых',
+                4: 'ЧТ: Силовая круговая',
+                5: 'ПТ: Верх + плечи',
+                6: 'СБ: Прогулка 60 мин',
+                0: 'ВС: Полный отдых'
+            };
+            todayWorkout.innerText = workouts[today];
+
+            // ========== ОБРАБОТЧИКИ СОБЫТИЙ ==========
+            
+            // Навигация
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    switchSection(this.dataset.section);
+                });
+            });
+
+            // Меню приема пищи
+            mealMenu.addEventListener('click', function(e) {
+                const card = e.target.closest('.menu-card');
+                if (card) {
+                    showMeal(card.dataset.meal);
+                }
+            });
+
+            // Кнопки веса
+            document.getElementById('weightMinus').addEventListener('click', function() {
+                adjustWeight(-0.5);
+            });
+
+            document.getElementById('weightPlus').addEventListener('click', function() {
+                adjustWeight(0.5);
+            });
+
+            document.getElementById('setWeightBtn').addEventListener('click', function() {
+                const input = document.getElementById('manualWeight');
+                const value = parseFloat(input.value);
+                if (!isNaN(value)) {
+                    setWeight(value);
+                }
+                input.value = '';
+            });
+
+            document.getElementById('manualWeight').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const value = parseFloat(this.value);
+                    if (!isNaN(value)) {
+                        setWeight(value);
+                    }
+                    this.value = '';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
