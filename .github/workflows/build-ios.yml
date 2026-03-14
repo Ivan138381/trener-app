@@ -13,11 +13,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'  # ← ГЛАВНОЕ ИЗМЕНЕНИЕ: теперь версия 22
+          node-version: '22'
           cache: npm
 
       - name: Verify Node version
-        run: node --version  # Проверим, что версия правильная
+        run: node --version
 
       - name: Install dependencies
         run: npm ci
@@ -29,7 +29,15 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/
-          npx cap sync ios
+
+      - name: Add iOS platform
+        run: npx cap add ios  # ← ВАЖНО: создает iOS проект
+
+      - name: Sync with Capacitor
+        run: npx cap sync ios  # ← ВАЖНО: копирует web в нативный проект
+
+      - name: List iOS directory contents (для проверки)
+        run: ls -la ios/
 
       - name: Build iOS app
         run: |
