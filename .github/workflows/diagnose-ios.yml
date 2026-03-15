@@ -21,81 +21,87 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Step 1 - Before removing ios
+      - name: 📁 Step 1 - Before removing ios
         run: |
-          echo "📁 BEFORE REMOVING:"
-          ls -la || true
+          echo "Содержимое корня проекта:"
+          ls -la
           echo ""
-          echo "📁 ios folder exists? $(if [ -d ios ]; then echo YES; else echo NO; fi)"
+          echo "Папка ios существует? $(if [ -d ios ]; then echo "✅ ДА"; else echo "❌ НЕТ"; fi)"
           if [ -d ios ]; then
-            echo "Contents of ios:"
-            ls -la ios/ || true
+            echo "Содержимое ios:"
+            ls -la ios/
           fi
 
-      - name: Remove ios folder
+      - name: 🗑️ Step 2 - Remove ios folder
         run: rm -rf ios
 
-      - name: Step 2 - After removal
+      - name: ✅ Step 3 - After removal
         run: |
-          echo "📁 AFTER REMOVAL: ios exists? $(if [ -d ios ]; then echo YES; else echo NO; fi)"
+          echo "Папка ios после удаления: $(if [ -d ios ]; then echo "❓ ЕЩЕ ЕСТЬ"; else echo "✅ УДАЛЕНА"; fi)"
 
-      - name: Install Capacitor CLI
+      - name: 📦 Step 4 - Install Capacitor CLI
         run: npm install -g @capacitor/cli
 
-      - name: Step 3 - Check Capacitor version
+      - name: ℹ️ Step 5 - Check Capacitor version
         run: npx cap --version
 
-      - name: Add iOS platform
+      - name: ➕ Step 6 - Add iOS platform
         run: npx cap add ios
         continue-on-error: true
 
-      - name: Step 4 - After cap add ios
+      - name: 🔍 Step 7 - After cap add ios
         run: |
-          echo "📁 AFTER CAP ADD:"
-          echo "ios exists? $(if [ -d ios ]; then echo YES; else echo NO; fi)"
+          echo "РЕЗУЛЬТАТ КОМАНДЫ cap add ios:"
+          echo "Папка ios существует? $(if [ -d ios ]; then echo "✅ ДА"; else echo "❌ НЕТ"; fi)"
           if [ -d ios ]; then
-            echo "Contents of ios:"
+            echo "Содержимое папки ios (первый уровень):"
             ls -la ios/
             echo ""
-            echo "Contents of ios/App:"
-            ls -la ios/App/ || echo "ios/App does not exist"
+            echo "Содержимое папки ios/App (если есть):"
+            if [ -d ios/App ]; then
+              ls -la ios/App/
+            else
+              echo "❌ Папка ios/App НЕ создана"
+            fi
             echo ""
-            echo "Looking for .xcworkspace:"
-            find ios -name "*.xcworkspace" -type d || echo "No .xcworkspace found"
+            echo "Поиск файлов .xcworkspace:"
+            find ios -name "*.xcworkspace" -type d || echo "❌ .xcworkspace не найден"
           fi
 
-      - name: Sync Capacitor
+      - name: 🔄 Step 8 - Sync Capacitor
         run: npx cap sync ios
         continue-on-error: true
 
-      - name: Step 5 - After cap sync
+      - name: 🔍 Step 9 - After cap sync
         run: |
-          echo "📁 AFTER CAP SYNC:"
+          echo "РЕЗУЛЬТАТ ПОСЛЕ cap sync ios:"
           if [ -d ios/App ]; then
-            echo "Contents of ios/App:"
+            echo "Содержимое ios/App:"
             ls -la ios/App/
             echo ""
-            echo "Looking for .xcworkspace again:"
-            find ios -name "*.xcworkspace" -type d || echo "Still no .xcworkspace"
+            echo "Повторный поиск .xcworkspace:"
+            find ios -name "*.xcworkspace" -type d || echo "❌ .xcworkspace всё еще не найден"
+          else
+            echo "❌ Папка ios/App так и не создалась"
           fi
 
-      - name: Try to create workspace manually (fallback)
+      - name: 🛠️ Step 10 - Try manual workspace creation (fallback)
         run: |
-          echo "🔧 Attempting to create workspace manually..."
-          cd ios
-          mkdir -p App
-          cd App
+          echo "Пробуем создать проект вручную..."
+          mkdir -p ios/App
+          cd ios/App
           cat > Podfile << 'EOF'
           platform :ios, '14.0'
           target 'App' do
             use_frameworks! :linkage => :static
           end
           EOF
-          pod install || true
+          pod init 2>/dev/null || true
+          pod install 2>/dev/null || true
           cd ../..
-          echo "Manual workspace creation attempted"
+          echo "Готово."
 
-      - name: Final Step - Upload diagnostic logs
+      - name: 📤 Final Step - Upload diagnostic logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -103,5 +109,4 @@ jobs:
           path: |
             ./*
             ./ios/**
-            ./node_modules/.cache/
           if-no-files-found: warn
