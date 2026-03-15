@@ -1,0 +1,104 @@
+name: Diagnose iOS Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Step 1 - Before removing ios
+        run: |
+          echo "📁 BEFORE REMOVING:"
+          ls -la || true
+          echo ""
+          echo "📁 ios folder exists? $(if [ -d ios ]; then echo YES; else echo NO; fi)"
+          if [ -d ios ]; then
+            echo "Contents of ios:"
+            ls -la ios/ || true
+          fi
+
+      - name: Remove ios folder
+        run: rm -rf ios
+
+      - name: Step 2 - After removal
+        run: |
+          echo "📁 AFTER REMOVAL: ios exists? $(if [ -d ios ]; then echo YES; else echo NO; fi)"
+
+      - name: Install Capacitor CLI
+        run: npm install -g @capacitor/cli
+
+      - name: Step 3 - Check Capacitor version
+        run: npx cap --version
+
+      - name: Add iOS platform
+        run: npx cap add ios
+        continue-on-error: true
+
+      - name: Step 4 - After cap add ios
+        run: |
+          echo "📁 AFTER CAP ADD:"
+          echo "ios exists? $(if [ -d ios ]; then echo YES; else echo NO; fi)"
+          if [ -d ios ]; then
+            echo "Contents of ios:"
+            ls -la ios/
+            echo ""
+            echo "Contents of ios/App:"
+            ls -la ios/App/ || echo "ios/App does not exist"
+            echo ""
+            echo "Looking for .xcworkspace:"
+            find ios -name "*.xcworkspace" -type d || echo "No .xcworkspace found"
+          fi
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+        continue-on-error: true
+
+      - name: Step 5 - After cap sync
+        run: |
+          echo "📁 AFTER CAP SYNC:"
+          if [ -d ios/App ]; then
+            echo "Contents of ios/App:"
+            ls -la ios/App/
+            echo ""
+            echo "Looking for .xcworkspace again:"
+            find ios -name "*.xcworkspace" -type d || echo "Still no .xcworkspace"
+          fi
+
+      - name: Try to create workspace manually (fallback)
+        run: |
+          echo "🔧 Attempting to create workspace manually..."
+          cd ios
+          mkdir -p App
+          cd App
+          cat > Podfile << 'EOF'
+          platform :ios, '14.0'
+          target 'App' do
+            use_frameworks! :linkage => :static
+          end
+          EOF
+          pod install || true
+          cd ../..
+          echo "Manual workspace creation attempted"
+
+      - name: Final Step - Upload diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-logs
+          path: |
+            ./*
+            ./ios/**
+            ./node_modules/.cache/
+          if-no-files-found: warn
