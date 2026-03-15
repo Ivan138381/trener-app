@@ -2,8 +2,9 @@ name: Build Unsigned iOS IPA
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -18,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -29,7 +29,7 @@ jobs:
       - name: Copy index.html to www
         run: cp index.html www/ || echo "index.html not found"
 
-      - name: Install Capacitor CLI
+      - name: Install Capacitor CLI globally
         run: npm install -g @capacitor/cli
 
       - name: Remove existing iOS folder
@@ -41,16 +41,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Install CocoaPods dependencies
+      - name: Build iOS app (using .xcodeproj)
         run: |
           cd ios/App
-          pod install || echo "Pod install skipped"
-
-      - name: Build iOS app (unsigned)
-        run: |
-          cd ios/App
-          # Сборка без подписи
-          xcodebuild -workspace App.xcworkspace \
+          # Используем -project вместо -workspace
+          xcodebuild -project App.xcodeproj \
                      -scheme App \
                      -configuration Release \
                      -sdk iphoneos \
@@ -58,17 +53,20 @@ jobs:
                      CODE_SIGNING_REQUIRED=NO \
                      build
 
-      - name: Create Payload folder and package IPA
+      - name: Find and package .app as IPA
         run: |
-          # Находим .app файл
+          # Ищем .app файл в стандартной папке сборки
           APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "*.app" -type d | head -1)
           if [ -n "$APP_PATH" ]; then
+            echo "✅ Найден .app файл: $APP_PATH"
             mkdir -p Payload
             cp -r "$APP_PATH" Payload/
             zip -r app.ipa Payload
             echo "✅ IPA создан: app.ipa"
           else
-            echo "❌ .app файл не найден"
+            echo "❌ .app файл не найден!"
+            # Пробуем найти в другом месте
+            find /Users/runner -name "*.app" -type d || true
             exit 1
           fi
 
@@ -79,7 +77,7 @@ jobs:
           path: app.ipa
           retention-days: 30
 
-      - name: Upload build logs (for debugging)
+      - name: Upload build logs (if failed)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
